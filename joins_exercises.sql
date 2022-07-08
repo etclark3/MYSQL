@@ -125,7 +125,7 @@ WHERE salaries.to_date > NOW()
 AND dept_emp.to_date > NOW()
 GROUP BY dept_name
 ORDER BY 'Department Avg' DESC;
-	-- COMPLETE. Sales has the highest avereage salary
+	-- COMPLETE. Sales has the highest average salary
     
 -- Q7: Who is the highest paid employee in the Marketing department?
 SELECT CONCAT(first_name, ' ', last_name) AS Employee, Salary
@@ -168,15 +168,6 @@ ORDER BY 'Department Avg' DESC;
 	-- COMPLETE
     
 -- Bonus: Find the names of all current employees, their department name, and their current manager's name.
-SELECT CONCAT(first_name, ' ', last_name) AS Employee, dept_name AS Department, dept_no AS Manager
-FROM employees
-JOIN dept_manager
-USING (emp_no)
-JOIN departments
-USING (dept_no)
-dept_no = emp_no;
-	-- NOT COMPLETE
-    
--- Bonus: Who is the highest paid employee within each department.
 
 	-- NOT COMPLETE
+    
