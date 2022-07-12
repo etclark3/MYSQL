@@ -14,6 +14,18 @@ WHERE hire_date =
 (SELECT hire_date
 FROM employees
 WHERE emp_no = '101010')
+AND to_date > NOW();
+
+SELECT * FROM dept_emp
+WHERE to_date > NOW());
+
+SELECT emp_no, CONCAT(first_name, ' ', last_name) AS Employee, hire_date AS 'Hire Date'
+FROM employees
+WHERE hire_date =
+(SELECT hire_date
+FROM employees
+WHERE emp_no = '101010'
+AND emp_no IN (SELECT to_date FROM dept_emp WHERE to_date > NOW()))
 ORDER BY Employee ASC;
 	-- 68 other employees were hired on the same day as employee 101010 (Demos Christ)
     
@@ -123,7 +135,28 @@ FROM salaries
 WHERE to_date > NOW())
 ORDER BY salary ASC;
 
+-- What percentage of all salaries is this?
+SELECT (SELECT COUNT(salary) AS Salary
+FROM salaries
+JOIN employees
+USING (emp_no)
+WHERE to_date > NOW()
+AND salary > ((SELECT MAX(salary)
+FROM salaries
+WHERE to_date > NOW()) - (SELECT STD(salary)
+FROM salaries
+WHERE to_date > NOW())))
+/ 
+(SELECT COUNT(salary) Salary FROM salaries WHERE to_date > NOW())
+* 100;
+
+SELECT COUNT(salary) FROM salaries WHERE to_date > NOW();
+
+SELECT MAX(salary)
+FROM salaries
+WHERE to_date > NOW();
 	-- COMPLETE
+     
 -- 2 STDs away? 1331
 SELECT COUNT(salary) AS Salary
 FROM salaries
@@ -139,6 +172,7 @@ WHERE to_date > NOW()) - (SELECT ROUND(STD(salary))
 FROM salaries
 WHERE to_date > NOW()));
 
+-- 1331
 SELECT CONCAT(first_name, ' ', last_name) AS Employee, salary Salary
 FROM employees
 JOIN salaries
@@ -153,15 +187,54 @@ ORDER BY salary ASC;
 -- BONUS --
 
 -- BQ1: Find all the department names that currently have female managers.
-SELECT CONCAT(first_name, ' ', last_name) AS Employee, dept_ AS Department
+SELECT CONCAT(first_name, ' ', last_name) AS Employee, dept_name AS Department
 FROM employees
-WHERE gender ='F';
+JOIN dept_manager
+USING (emp_no)
+JOIN departments
+USING (dept_no)
+WHERE gender ='F'
+AND to_date > NOW();
 
+SELECT * FROM dept_manager;
+
+SELECT dept_name AS Department, 
+FROM departments
+WHERE dept_no IN 
+(SELECT dept_no
+	FROM dept_manager
+	WHERE emp_no IN 
+(SELECT emp_no
+FROM employees
+WHERE gender = 'F')
+AND to_date > CURDATE());
+                    
 -- BQ2: Find the first and last name of the employee with the highest salary.
-SELECT
-FROM 
-WHERE 
+SELECT CONCAT(first_name, ' ', last_name) AS Employee
+FROM employees
+WHERE emp_no = (SELECT emp_no FROM salaries WHERE salary = (SELECT MAX(salary) Salary
+FROM salaries
+WHERE to_date > NOW()));
+
+SELECT MAX(salary) Salary, first_name, last_name
+FROM salaries
+JOIN employees
+USING (emp_no)
+WHERE to_date > NOW()
+;
 -- BQ3: Find the department name that the employee with the highest salary works in.
-SELECT
-FROM 
-WHERE 
+SELECT CONCAT(first_name, ' ', last_name) AS Employee, dept_name AS Department
+FROM departments
+JOIN employees
+USING (emp_no)
+JOIN dept_emp
+USING (dept_no)
+WHERE emp_no = (SELECT MAX(salary) Salary
+FROM salaries
+WHERE to_date > NOW());
+
+SELECT dept_name AS Department
+FROM departments
+WHERE emp_no = (SELECT MAX(salary) Salary
+FROM salaries
+WHERE to_date > NOW());
